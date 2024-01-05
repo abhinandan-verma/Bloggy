@@ -4,46 +4,74 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            Counter()
+            CoroutineScopeComposable()
         }
     }
 }
 
 @Composable
-fun Counter() {
-    val count = remember {
+fun LaunchEffectComposable() {
+    val counter = remember { mutableIntStateOf(0) }
+    val scope = rememberCoroutineScope()
+    LaunchedEffect(key1 = Unit) {
+        Log.i("LaunchedEffectComposable", "Started...")
+        try {
+            for (i in 1..10) {
+                counter.intValue++
+                Log.i("Tag", "Counter increased to ${counter.intValue}")
+                delay(1000)
+            }
+        } catch (e: Exception) {
+            Log.e("LaunchedEffectComposable", "Exception: ${e.message.toString()}")
+        }
+    }
+    var text = "Counter is running ${counter.intValue}"
+    if (counter.intValue == 10) {
+        text = "Counter Stopped"
+    }
+    Text(text = text)
+}
+
+@Composable
+fun CoroutineScopeComposable() {
+    val counter = remember {
         mutableIntStateOf(0)
     }
-    var key = count.intValue % 3 == 0
-    LaunchedEffect(key1 = key){
-        Log.i("TAG", "Counter value: ${count.intValue}")
+    val scope = rememberCoroutineScope()
+    var text = "Counter is running ${counter.intValue}"
+    if (counter.intValue == 10) {
+        text = "Counter Stopped"
     }
-    Button(
-        onClick = { count.intValue++ },
-    ) {
-        Text(
-            text = "Increment Count",
-            Modifier.background(
-                Brush.linearGradient(
-                    listOf(Color.Cyan, Color.Magenta, Color.Yellow)
-                )
-            )
-        )
+    Column {
+        Text(text = text)
+        Button(onClick = { scope.launch {
+            Log.i("CoroutineScopeComposable", "Started")
+            try {
+                for (i in 1..10){
+                    counter.intValue++
+                    delay(1000)
+                }
+            }catch (e: Exception){
+                Log.d("CoroutineScopeComposable","Exception: ${e.message.toString()}")
+            }
+        } }) {
+            Text(text = "Start")
+        }
     }
 }
 /*
