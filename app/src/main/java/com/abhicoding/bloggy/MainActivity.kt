@@ -5,13 +5,19 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -19,9 +25,59 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            CoroutineScopeComposable()
+
         }
     }
+}
+
+@Composable
+fun App3() {
+    val state = remember {
+        mutableStateOf(false)
+    }
+    DisposableEffect(key1 = state){
+        onDispose {  }
+    }
+}
+fun a(){ Log.d("A","I am A from App")}
+fun b(){ Log.d("B","I am B from App")}
+@Composable
+fun App2() {
+    val state = remember { mutableStateOf(::a) }
+    Button(onClick = { state.value = ::b }) {
+        Text(text = "Click to change State")
+    }
+    LandingScreen(state.value)
+}
+
+@Composable
+fun LandingScreen(onTimeout: () -> Unit) {
+val currentTimeout by rememberUpdatedState(onTimeout)
+    LaunchedEffect(key1 = true){
+        delay(5000)
+        currentTimeout()
+    }
+}
+
+@Composable
+fun App() {
+    val counter = remember {
+        mutableIntStateOf(0)
+    }
+    LaunchedEffect(key1 = Unit){
+        delay(2000)
+        counter.intValue = 20
+    }
+    Counter(counter.intValue)
+}
+
+@Composable
+fun Counter(counter: Int) {
+    LaunchedEffect(key1 = counter){
+        delay(5000)
+        Log.i("ABHI",counter.toString())
+    }
+Text(text = counter.toString())
 }
 
 @Composable
@@ -74,7 +130,7 @@ fun CoroutineScopeComposable() {
         }
     }
 }
-/*
+
 @Composable
 fun ListComposable(){
     val categoryState = remember { mutableStateOf(emptyList<String>()) }
@@ -90,4 +146,3 @@ fun ListComposable(){
 fun fetchCategories(): List<String> {
     return listOf("One", "Two","Three")
 }
-*/
